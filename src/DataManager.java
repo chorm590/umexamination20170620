@@ -11,7 +11,7 @@ public class DataManager {
 	/**
 	 * 从books.txt中提取数据到程序中。
 	 * */
-	public void prepareRecords(ArrayList<BookInfoBean> list, String inputFile, String outputFile) {
+	public void prepareRecords(ArrayList<BookInfoBean> list, String inputFile) {
 		FileInputStream fis = null;
 		InputStreamReader isr = null;
 		BufferedReader br = null;
@@ -50,6 +50,7 @@ public class DataManager {
 		BookInfoBean bean = new BookInfoBean();
 		System.out.println("line:"+line);
 		String tmp[] = line.split("\t");
+		
 		try{
 			//类型
 			bean.setType(Integer.valueOf(tmp[0]));
@@ -60,51 +61,37 @@ public class DataManager {
 			//ISBN
 			bean.setIsbn(tmp[3]);
 		}catch(NumberFormatException e){
-//			e.printStackTrace();
-			System.out.println("A record was error:"+line);
+			System.out.println("A record was format error!!!:"+line);
+			System.out.println("picBookInfo,tmp size:"+tmp.length);
+			for(String q:tmp){
+				System.out.println("Error parsing:"+q);
+			}
 			char buf[] = line.toCharArray();
-			StringBuilder sb = new StringBuilder();
-			int idx = 0;
-			byte flag = 9;
-			//下面主要是针对格式错误的。
+			int counter = 1;
 			for(char c:buf){
-				int a = c;
-				System.out.println(c+",,,"+a+",,"+flag);
-				if(
-						c != '\t'
-						&&
-						c != ' '
-						&&
-						c != flag
-						){
+				System.out.println(counter+++":"+c);
+			}
+			
+			StringBuilder sb = new StringBuilder();
+			counter = 0;
+			for(char c:buf){
+				if(c >= '0' && c <= '9'){
 					sb.append(c);
-				}else{
-					switch(idx){
+				}else if(c == '\t'){
+					switch(counter){
 					case 0:{
-						bean.setType(Integer.valueOf(sb.toString()));
-					}
-					case 1:{
-						bean.setSerial(Integer.valueOf(sb.toString()));
-					}
-					case 2:{
-						bean.setName("error "+sb.toString());
-					}
-					case 3:{
-						bean.setIsbn(sb.toString());
-					}
-					}
-					if(sb.length() > 0){
-//						System.out.println(":::"+sb.toString());s
-						sb.delete(0, sb.length());
-						idx++;
+						
+					}break;
+					case 1:{}break;
+					case 2:{}break;
+					case 3:{}break;
 					}
 				}
-				bean.setIsbn(sb.toString());
 			}
-		}
+		}//catch  --  end.
 		
 		return bean;
-	}
+	}//pickBookInfo  --  end.
 	
 	/**
 	 * 给已读取的图书数据进行排序。
@@ -133,10 +120,6 @@ public class DataManager {
 			}
 		}
 		System.out.println("\n\nsort finish..\n");
-//		int k = 1;
-//		for(BookInfoBean bean:list){
-//			System.out.println(k++ +":"+bean.getType());
-//		}
 	}
 
 	/**
@@ -155,13 +138,14 @@ public class DataManager {
 		/**用临时保存错误数据记录。*/
 		ArrayList<BookInfoBean> errorList = new ArrayList<>();
 		
+		System.out.println("Going to check data...");
+		
 		for(int i = 0; i < list.size(); i++){
 			BookInfoBean bean = list.get(i);
 			System.out.println("\n\ntype:"+bean.getType());
 			//1.检查类型是否有错误。
 			if(bean.getType() < 1 || bean.getType() > 255){
 				errorList.add(bean);
-				list.remove(i);
 				continue;
 			}
 			
@@ -169,20 +153,17 @@ public class DataManager {
 			System.out.println("serial:"+bean.getSerial());
 			if(bean.getSerial() < 1 || bean.getSerial() > 999){
 				errorList.add(bean);
-				list.remove(i);
 				continue;
 			}
 			
 			//3.检查图书名称是否有错误。
-			System.out.println("name length:"+bean.getName().length());
-			if(bean.getName().length() > 64){
+			System.out.println("name length:"+bean.getName().getBytes().length);
+			if(bean.getName().getBytes().length > 64){
 				errorList.add(bean);
-				list.remove(i);
 				continue;
 			}else if(bean.getName().startsWith("error")){
 				bean.setName(bean.getName().substring(5, bean.getName().length()));
 				errorList.add(bean);
-				list.remove(i);
 				continue;
 			}
 			
@@ -212,11 +193,12 @@ public class DataManager {
 			
 			if(isISBNError){
 				errorList.add(bean);
-				list.remove(i);
 				continue;
 			}
 		}// for -- end.
-//		System.out.println("\n\n\n  error size:"+errorList.size());
+		System.out.println("\n\n\n  error data size:"+errorList.size());
+		//对于出错的数据，只能在全部检查完以后才一起删，若边检查边删，又不对索引作减1处理，则会影响到后续的检查工作。
+		list.removeAll(errorList);
 		sort(errorList);
 		list.addAll(list.size(), errorList);
 	}

@@ -36,26 +36,26 @@ public class UMMain {
 	}
 
 	private void begin() {
-		//解析10条记录的
-		dataMana.prepareRecords(list10, RECORD10+INPUT, RECORD10+OUTPUT);
-		dataMana.sort(list10);
-		dataMana.check(list10);
-		dataMana.out(list10, RECORD10+OUTPUT);
-		
-		//解析50条记录的
-		dataMana.prepareRecords(list50, RECORD50+INPUT, RECORD50+OUTPUT);
-		dataMana.sort(list50);
-		dataMana.check(list50);
-		dataMana.out(list50, RECORD50+OUTPUT);
-		
-		//解析150条记录的
-		dataMana.prepareRecords(list150, RECORD150+INPUT, RECORD150+OUTPUT);
-		dataMana.sort(list150);
-		dataMana.check(list150);
-		dataMana.out(list150, RECORD150+OUTPUT);
+//		//解析10条记录的
+//		dataMana.prepareRecords(list10, RECORD10+INPUT);
+//		dataMana.sort(list10);
+//		dataMana.check(list10);
+//		dataMana.out(list10, RECORD10+OUTPUT);
+//		
+//		//解析50条记录的
+//		dataMana.prepareRecords(list50, RECORD50+INPUT);
+//		dataMana.sort(list50);
+//		dataMana.check(list50);
+//		dataMana.out(list50, RECORD50+OUTPUT);
+//		
+//		//解析150条记录的
+//		dataMana.prepareRecords(list150, RECORD150+INPUT);
+//		dataMana.sort(list150);
+//		dataMana.check(list150);
+//		dataMana.out(list150, RECORD150+OUTPUT);
 		
 		//解析有错误数据记录的
-		dataMana.prepareRecords(listError, RECORD_ERROR+INPUT, RECORD_ERROR+OUTPUT);
+		dataMana.prepareRecords(listError, RECORD_ERROR+INPUT);
 		dataMana.sort(listError);
 		dataMana.check(listError);
 		dataMana.out(listError, RECORD_ERROR+OUTPUT);
