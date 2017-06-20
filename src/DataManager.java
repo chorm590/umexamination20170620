@@ -1,0 +1,258 @@
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+
+public class DataManager {
+
+	/**
+	 * 从books.txt中提取数据到程序中。
+	 * */
+	public void prepareRecords(ArrayList<BookInfoBean> list, String inputFile, String outputFile) {
+		FileInputStream fis = null;
+		InputStreamReader isr = null;
+		BufferedReader br = null;
+		list.clear();
+		try {
+			fis = new FileInputStream(inputFile);
+			isr = new InputStreamReader(fis, "GB2312");
+			br = new BufferedReader(isr);
+			
+			do{
+				String line = br.readLine();
+//				System.out.println(line);
+				//判断是否读取完毕。
+				if(line == null || "".equals(line)){
+					System.out.println("read records end!");
+					break;
+				}
+				list.add(pickBookInfo(line));
+			}while(true);
+			
+			fis.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		System.out.println("Prepare records finish!");
+	}
+	
+	/**
+	 * 与prepareRecords方法配合使用。
+	 * 将读取进来的一行数据解析成单条的图书数据。
+	 * */
+	private BookInfoBean pickBookInfo(String line){
+		BookInfoBean bean = new BookInfoBean();
+		System.out.println("line:"+line);
+		String tmp[] = line.split("\t");
+		try{
+			//类型
+			bean.setType(Integer.valueOf(tmp[0]));
+			//序列号
+			bean.setSerial(Integer.valueOf(tmp[1]));
+			//名称
+			bean.setName(tmp[2]);
+			//ISBN
+			bean.setIsbn(tmp[3]);
+		}catch(NumberFormatException e){
+//			e.printStackTrace();
+			System.out.println("A record was error:"+line);
+			char buf[] = line.toCharArray();
+			StringBuilder sb = new StringBuilder();
+			int idx = 0;
+			byte flag = 9;
+			//下面主要是针对格式错误的。
+			for(char c:buf){
+				int a = c;
+				System.out.println(c+",,,"+a+",,"+flag);
+				if(
+						c != '\t'
+						&&
+						c != ' '
+						&&
+						c != flag
+						){
+					sb.append(c);
+				}else{
+					switch(idx){
+					case 0:{
+						bean.setType(Integer.valueOf(sb.toString()));
+					}
+					case 1:{
+						bean.setSerial(Integer.valueOf(sb.toString()));
+					}
+					case 2:{
+						bean.setName("error "+sb.toString());
+					}
+					case 3:{
+						bean.setIsbn(sb.toString());
+					}
+					}
+					if(sb.length() > 0){
+//						System.out.println(":::"+sb.toString());s
+						sb.delete(0, sb.length());
+						idx++;
+					}
+				}
+				bean.setIsbn(sb.toString());
+			}
+		}
+		
+		return bean;
+	}
+	
+	/**
+	 * 给已读取的图书数据进行排序。
+	 * */
+	public void sort(ArrayList<BookInfoBean> list){
+		for(int i = 0; i < list.size() - 1; i++){
+			BookInfoBean bean = list.get(i);
+			int min = i;
+			//排序方式，我自己想出来的哦。
+			for(int j = i+1; j < list.size(); j++){
+				if(bean.getType() > list.get(j).getType()){
+					bean = list.get(j);
+					min = j;
+				}else if(bean.getType() == list.get(j).getType()){
+					//这里是当类型号相等时，根据序列号由大到小排序。
+					if(bean.getSerial() < list.get(j).getSerial()){
+						bean = list.get(j);
+						min = j;
+					}
+				}
+			}
+			//Insert the min.
+			if(min != i){
+				list.remove(min);
+				list.add(i, bean);
+			}
+		}
+		System.out.println("\n\nsort finish..\n");
+//		int k = 1;
+//		for(BookInfoBean bean:list){
+//			System.out.println(k++ +":"+bean.getType());
+//		}
+	}
+
+	/**
+	 * 根据规则检查数据是否有错误，有错误的就把它放到后面去。
+	 * */
+	public void check(ArrayList<BookInfoBean> list) {
+		/*
+
+		 1. “类型编号”的范围是1~255；
+		 2. “类内序列号”的范围1~999；
+		 3. “书名”长度小于64字节；
+		 4. “条形码”长度18字节，其中前4字节固定为"ISBN"，后14字节为数字。
+		 
+		 */
+		
+		/**用临时保存错误数据记录。*/
+		ArrayList<BookInfoBean> errorList = new ArrayList<>();
+		
+		for(int i = 0; i < list.size(); i++){
+			BookInfoBean bean = list.get(i);
+			System.out.println("\n\ntype:"+bean.getType());
+			//1.检查类型是否有错误。
+			if(bean.getType() < 1 || bean.getType() > 255){
+				errorList.add(bean);
+				list.remove(i);
+				continue;
+			}
+			
+			//2.检查序列号是否有错误。
+			System.out.println("serial:"+bean.getSerial());
+			if(bean.getSerial() < 1 || bean.getSerial() > 999){
+				errorList.add(bean);
+				list.remove(i);
+				continue;
+			}
+			
+			//3.检查图书名称是否有错误。
+			System.out.println("name length:"+bean.getName().length());
+			if(bean.getName().length() > 64){
+				errorList.add(bean);
+				list.remove(i);
+				continue;
+			}else if(bean.getName().startsWith("error")){
+				bean.setName(bean.getName().substring(5, bean.getName().length()));
+				errorList.add(bean);
+				list.remove(i);
+				continue;
+			}
+			
+			//4.检查ISBN是否有错误。
+			String isbn = bean.getIsbn();
+			System.out.println("ISBN:"+isbn);
+			boolean isISBNError = false;
+			if(isbn.length() > 18){
+				isISBNError = true;
+			}else{
+				if(!isbn.startsWith("ISBN")){//区分大小写
+					isISBNError = true;
+				}else{
+					String last14Bytes = isbn.substring(4, isbn.length());
+					System.out.println("isbnlast14:"+last14Bytes);
+					byte buf[] = last14Bytes.getBytes();
+					for(byte b:buf){
+						if(b >= '0' && b <= '9'){
+							
+						}else{
+							isISBNError = true;
+							break;
+						}
+					}
+				}
+			}
+			
+			if(isISBNError){
+				errorList.add(bean);
+				list.remove(i);
+				continue;
+			}
+		}// for -- end.
+//		System.out.println("\n\n\n  error size:"+errorList.size());
+		sort(errorList);
+		list.addAll(list.size(), errorList);
+	}
+
+	/**
+	 * 将排好序的数据输出到books_sort.txt文件中。
+	 * */
+	public void out(ArrayList<BookInfoBean> list, String out) {
+		FileOutputStream fos = null;
+		try {
+			fos = new FileOutputStream(out);
+			for(BookInfoBean bean:list){
+				StringBuilder s = new StringBuilder();
+				//封装数据。
+				s.append(bean.getType());
+				s.append("\t");
+				s.append(bean.getSerial());
+				s.append("\t");
+				s.append(bean.getName());
+				s.append("\t");
+				s.append(bean.getIsbn());
+				s.append("\n");
+				
+				byte buf[] = s.toString().getBytes();
+				
+				fos.write(buf);
+			}
+			fos.flush();
+			
+			fos.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		System.out.println("write file end."+out);
+	}
+}
