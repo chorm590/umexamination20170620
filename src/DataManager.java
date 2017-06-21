@@ -50,45 +50,30 @@ public class DataManager {
 		BookInfoBean bean = new BookInfoBean();
 		System.out.println("line:"+line);
 		String tmp[] = line.split("\t");
-		
-		try{
-			//类型
-			bean.setType(Integer.valueOf(tmp[0]));
-			//序列号
-			bean.setSerial(Integer.valueOf(tmp[1]));
-			//名称
-			bean.setName(tmp[2]);
-			//ISBN
-			bean.setIsbn(tmp[3]);
-		}catch(NumberFormatException e){
-			System.out.println("A record was format error!!!:"+line);
-			System.out.println("picBookInfo,tmp size:"+tmp.length);
-			for(String q:tmp){
-				System.out.println("Error parsing:"+q);
-			}
-			char buf[] = line.toCharArray();
-			int counter = 1;
-			for(char c:buf){
-				System.out.println(counter+++":"+c);
-			}
-			
-			StringBuilder sb = new StringBuilder();
-			counter = 0;
-			for(char c:buf){
-				if(c >= '0' && c <= '9'){
-					sb.append(c);
-				}else if(c == '\t'){
-					switch(counter){
-					case 0:{
-						
-					}break;
-					case 1:{}break;
-					case 2:{}break;
-					case 3:{}break;
-					}
-				}
-			}
-		}//catch  --  end.
+		//检查错误数据这块很复杂。要考虑的问题很多。
+		if(tmp.length != 4){
+			bean.setType(1);
+			bean.setSerial(1);
+			bean.setName(null);
+			bean.setIsbn(line);
+		}else{
+			try{
+				//类型
+				bean.setType(Integer.valueOf(tmp[0]));
+				//序列号
+				bean.setSerial(Integer.valueOf(tmp[1]));
+				//名称
+				bean.setName(tmp[2]);
+				//ISBN
+				bean.setIsbn(tmp[3]);
+			}catch(NumberFormatException e){
+				System.out.println("A record was format error!!!:"+line);
+				bean.setType(1);
+				bean.setSerial(1);
+				bean.setName(null);
+				bean.setIsbn(line);
+			}//catch  --  end.
+		}
 		
 		return bean;
 	}//pickBookInfo  --  end.
@@ -158,11 +143,9 @@ public class DataManager {
 			
 			//3.检查图书名称是否有错误。
 			System.out.println("name length:"+bean.getName().getBytes().length);
-			if(bean.getName().getBytes().length > 64){
-				errorList.add(bean);
+			if(bean.getName() == null){
 				continue;
-			}else if(bean.getName().startsWith("error")){
-				bean.setName(bean.getName().substring(5, bean.getName().length()));
+			}else if(bean.getName().getBytes().length > 64){
 				errorList.add(bean);
 				continue;
 			}
@@ -171,7 +154,7 @@ public class DataManager {
 			String isbn = bean.getIsbn();
 			System.out.println("ISBN:"+isbn);
 			boolean isISBNError = false;
-			if(isbn.length() > 18){
+			if(isbn.getBytes().length > 18){
 				isISBNError = true;
 			}else{
 				if(!isbn.startsWith("ISBN")){//区分大小写
