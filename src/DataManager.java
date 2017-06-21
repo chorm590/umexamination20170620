@@ -132,6 +132,12 @@ public class DataManager {
 			if(bean.getType() < 1 || bean.getType() > 255){
 				errorList.add(bean);
 				continue;
+			}else if(bean.getType() == 1 && bean.getSerial() == 1 && bean.getName() == null){
+				/*
+				 * 对于有格式错误的数据，已经在这里处理掉了。后面的序列号、书名及ISBN都不需要再处理格式错误的问题。
+				 * */
+				errorList.add(bean);
+				continue;
 			}
 			
 			//2.检查序列号是否有错误。
@@ -142,19 +148,26 @@ public class DataManager {
 			}
 			
 			//3.检查图书名称是否有错误。
-			System.out.println("name length:"+bean.getName().getBytes().length);
 			if(bean.getName() == null){
-				continue;
-			}else if(bean.getName().getBytes().length > 64){
+				System.out.println("Book name is null!");
 				errorList.add(bean);
 				continue;
+			}else{
+				System.out.println("name length:"+bean.getName().getBytes().length);
+				if(bean.getName().getBytes().length > 64){
+					errorList.add(bean);
+					continue;
+				}
 			}
 			
 			//4.检查ISBN是否有错误。
 			String isbn = bean.getIsbn();
 			System.out.println("ISBN:"+isbn);
 			boolean isISBNError = false;
-			if(isbn.getBytes().length > 18){
+			if(isbn == null){
+				System.out.println("ISBN is null!");
+				isISBNError = true;
+			}else if(isbn.getBytes().length > 18){
 				isISBNError = true;
 			}else{
 				if(!isbn.startsWith("ISBN")){//区分大小写
@@ -182,7 +195,7 @@ public class DataManager {
 		System.out.println("\n\n\n  error data size:"+errorList.size());
 		//对于出错的数据，只能在全部检查完以后才一起删，若边检查边删，又不对索引作减1处理，则会影响到后续的检查工作。
 		list.removeAll(errorList);
-		sort(errorList);
+//		sort(errorList); //错误的数据不需要进行排序处理。
 		list.addAll(list.size(), errorList);
 	}
 
@@ -194,21 +207,27 @@ public class DataManager {
 		try {
 			fos = new FileOutputStream(out);
 			for(BookInfoBean bean:list){
-				StringBuilder s = new StringBuilder();
-				//封装数据。
-				s.append(bean.getType());
-				s.append("\t");
-				s.append(bean.getSerial());
-				s.append("\t");
-				s.append(bean.getName());
-				s.append("\t");
-				s.append(bean.getIsbn());
-				s.append("\n");
-				
-				byte buf[] = s.toString().getBytes();
-				
-				fos.write(buf);
-			}
+				//检查格式错误的数据咯。。
+				if(bean.getType() == 1 && bean.getSerial() == 1 && bean.getName() == null){
+					fos.write(bean.getIsbn().getBytes());
+					fos.write("\n".getBytes());
+				}else{
+					StringBuilder s = new StringBuilder();
+					//封装数据。
+					s.append(bean.getType());
+					s.append("\t");
+					s.append(bean.getSerial());
+					s.append("\t");
+					s.append(bean.getName());
+					s.append("\t");
+					s.append(bean.getIsbn());
+					s.append("\n");
+					
+					byte buf[] = s.toString().getBytes();
+					
+					fos.write(buf);
+				}//else  --  end.
+			}//for  --  end.
 			fos.flush();
 			
 			fos.close();

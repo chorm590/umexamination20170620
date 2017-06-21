@@ -1,0 +1,10 @@
+
+
+1. 建议使用 Eclipse 来编译并运行。
+
+
+2. 若使用CMD编译运行：
+	a) compile command(In the root directory of this project): javac -sourcepath src src\*.java -d . -endcoding utf-8
+	b) execute the program(In the root directory of this project): java UMMain
+	c) The program is execute correctly while you see the character of ' Program end ! ' in the console window.
+

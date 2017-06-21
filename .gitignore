@@ -1,1 +1,3 @@
 bin/
+*.class
+books_sort.txt
