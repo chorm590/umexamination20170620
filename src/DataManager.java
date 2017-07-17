@@ -26,7 +26,7 @@ public class DataManager {
 //				System.out.println(line);
 				//判断是否读取完毕。
 				if(line == null || "".equals(line)){
-					System.out.println("read records end!");
+//					System.out.println("read records end!");
 					break;
 				}
 				list.add(pickBookInfo(line));
@@ -39,7 +39,7 @@ public class DataManager {
 			e.printStackTrace();
 		}
 		
-		System.out.println("Prepare records finish!");
+//		System.out.println("Prepare records finish!");
 	}
 	
 	/**
@@ -48,7 +48,7 @@ public class DataManager {
 	 * */
 	private BookInfoBean pickBookInfo(String line){
 		BookInfoBean bean = new BookInfoBean();
-		System.out.println("line:"+line);
+//		System.out.println("line:"+line);
 		String tmp[] = line.split("\t");
 		//检查错误数据这块很复杂。要考虑的问题很多。
 		if(tmp.length != 4){
@@ -104,7 +104,7 @@ public class DataManager {
 				list.add(i, bean);
 			}
 		}
-		System.out.println("\n\nsort finish..\n");
+//		System.out.println("\n\nsort finish..\n");
 	}
 
 	/**
@@ -123,11 +123,11 @@ public class DataManager {
 		/**用临时保存错误数据记录。*/
 		ArrayList<BookInfoBean> errorList = new ArrayList<>();
 		
-		System.out.println("Going to check data...");
+//		System.out.println("Going to check data...");
 		
 		for(int i = 0; i < list.size(); i++){
 			BookInfoBean bean = list.get(i);
-			System.out.println("\n\ntype:"+bean.getType());
+//			System.out.println("\n\ntype:"+bean.getType());
 			//1.检查类型是否有错误。
 			if(bean.getType() < 1 || bean.getType() > 255){
 				errorList.add(bean);
@@ -141,7 +141,7 @@ public class DataManager {
 			}
 			
 			//2.检查序列号是否有错误。
-			System.out.println("serial:"+bean.getSerial());
+//			System.out.println("serial:"+bean.getSerial());
 			if(bean.getSerial() < 1 || bean.getSerial() > 999){
 				errorList.add(bean);
 				continue;
@@ -149,11 +149,11 @@ public class DataManager {
 			
 			//3.检查图书名称是否有错误。
 			if(bean.getName() == null){
-				System.out.println("Book name is null!");
+//				System.out.println("Book name is null!");
 				errorList.add(bean);
 				continue;
 			}else{
-				System.out.println("name length:"+bean.getName().getBytes().length);
+//				System.out.println("name length:"+bean.getName().getBytes().length);
 				if(bean.getName().getBytes().length > 64){
 					errorList.add(bean);
 					continue;
@@ -162,10 +162,10 @@ public class DataManager {
 			
 			//4.检查ISBN是否有错误。
 			String isbn = bean.getIsbn();
-			System.out.println("ISBN:"+isbn);
+//			System.out.println("ISBN:"+isbn);
 			boolean isISBNError = false;
 			if(isbn == null){
-				System.out.println("ISBN is null!");
+//				System.out.println("ISBN is null!");
 				isISBNError = true;
 			}else if(isbn.getBytes().length > 18){
 				isISBNError = true;
@@ -174,7 +174,7 @@ public class DataManager {
 					isISBNError = true;
 				}else{
 					String last14Bytes = isbn.substring(4, isbn.length());
-					System.out.println("isbnlast14:"+last14Bytes);
+//					System.out.println("isbnlast14:"+last14Bytes);
 					byte buf[] = last14Bytes.getBytes();
 					for(byte b:buf){
 						if(b >= '0' && b <= '9'){
@@ -192,7 +192,7 @@ public class DataManager {
 				continue;
 			}
 		}// for -- end.
-		System.out.println("\n\n\n  error data size:"+errorList.size());
+//		System.out.println("\n\n\n  error data size:"+errorList.size());
 		//对于出错的数据，只能在全部检查完以后才一起删，若边检查边删，又不对索引作减1处理，则会影响到后续的检查工作。
 		list.removeAll(errorList);
 //		sort(errorList); //错误的数据不需要进行排序处理。
@@ -237,6 +237,6 @@ public class DataManager {
 			e.printStackTrace();
 		}
 		
-		System.out.println("write file end."+out);
+//		System.out.println("write file end."+out);
 	}
 }

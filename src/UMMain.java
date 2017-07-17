@@ -1,3 +1,4 @@
+import java.awt.SystemColor;
 import java.util.ArrayList;
 
 public class UMMain {
@@ -16,8 +17,11 @@ public class UMMain {
 	private ArrayList<BookInfoBean> listError;
 	
 	private DataManager dataMana;
+	private static long start;
+	private static long end;
 
 	public static void main(String[] args) {
+		start = System.currentTimeMillis();
 		UMMain main = new UMMain();
 		main.init();
 		main.begin();
@@ -60,8 +64,8 @@ public class UMMain {
 		dataMana.check(listError);
 		dataMana.out(listError, RECORD_ERROR+OUTPUT);
 		
-		
-		System.out.println("\n\n\t\tProgram end!!!");
+		end = System.currentTimeMillis();
+		System.out.println("\n\n\t\tProgram end!!! [ "+(end - start)+" ms]");
 	}
 
 }
