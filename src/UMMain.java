@@ -1,4 +1,4 @@
-import java.awt.SystemColor;
+import java.io.File;
 import java.util.ArrayList;
 
 public class UMMain {
@@ -22,10 +22,19 @@ public class UMMain {
 
 	public static void main(String[] args) {
 		start = System.currentTimeMillis();
+		
 		UMMain main = new UMMain();
 		main.init();
-		main.begin();
-	}
+		
+		if(args.length > 0) {
+			main.checkProgram();
+		}else {
+			main.begin();
+		}
+		
+		end = System.currentTimeMillis();
+		System.out.println("\n\n\t\tProgram end!!! [ "+(end - start)+" ms]");
+	}// main()  --  end.
 
 	/**
 	 * 初始化。
@@ -63,9 +72,25 @@ public class UMMain {
 		dataMana.sort(listError);
 		dataMana.check(listError);
 		dataMana.out(listError, RECORD_ERROR+OUTPUT);
-		
-		end = System.currentTimeMillis();
-		System.out.println("\n\n\t\tProgram end!!! [ "+(end - start)+" ms]");
+	}
+	
+	private void checkProgram() {
+		System.out.println("Checking your program...");
+		ArrayList<BookInfoBean> listChk = new ArrayList<>();
+		// Check with 'check' folder's files.
+		File checkFolder = new File("./check/");
+		File[] checkSubFolder = checkFolder.listFiles();
+		int counter = 1;
+		for(File sub:checkSubFolder) {
+			System.out.println("The "+ counter++ +" to check:"+sub.getPath());
+			if(sub.isDirectory()) {
+				listChk.clear();
+				dataMana.prepareRecords(listChk, sub.getPath()+"/"+INPUT);
+				dataMana.sort(listChk);
+				dataMana.check(listChk);
+				dataMana.out(listChk, sub.getPath()+"/"+OUTPUT);
+			}
+		}
 	}
 
 }

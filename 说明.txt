@@ -1,10 +1,14 @@
 
+0. 目前更推荐使用命令行编译运行。
 
-1. ����ʹ�� Eclipse �����벢���С�
+	甲：使用 Windows 系统的 CMD 来编译运行，Java version: 1.7 or higher.
+		a) compile command(In the root directory of this project): javac -sourcepath src src\*.java -d . -endcoding utf-8
+		b) execute the program(In the root directory of this project): java UMMain
+		c) or maybe you want to check whether this program is correct.  use command : java UMMain 1
+		d) The program is execute correctly while you see the character of ' Program end ! ' in the console window.
 
-
-2. ��ʹ��CMD�������У�
-	a) compile command(In the root directory of this project): javac -sourcepath src src\*.java -d . -endcoding utf-8
-	b) execute the program(In the root directory of this project): java UMMain
-	c) The program is execute correctly while you see the character of ' Program end ! ' in the console window.
-
+	乙：使用 linux 系统的命令行来编译运行， Java version: 1.7 or higher. 以下所有命令均在工程根目录下执行。
+		a) javac -sourcepath src src/*.java -d .
+		b) java UMMain
+		c) or maybe you want to check whether this program is correct.  use command : java UMMain 1
+		d) The program is execute correctly while you see the character of ' Program end ! ' in the console window.

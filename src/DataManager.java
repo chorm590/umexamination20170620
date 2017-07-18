@@ -167,7 +167,7 @@ public class DataManager {
 			if(isbn == null){
 //				System.out.println("ISBN is null!");
 				isISBNError = true;
-			}else if(isbn.getBytes().length > 18){
+			}else if(isbn.getBytes().length != 18){
 				isISBNError = true;
 			}else{
 				if(!isbn.startsWith("ISBN")){//区分大小写
